@@ -134,8 +134,7 @@ if not DEBUG:    # Tell Django to copy static assets into a path called `staticf
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CORS_ALLOWED_ORIGINS = [
-    'https://tu-frontend-en-aws.s3.amazonaws.com',  # cámbialo por tu dominio real
-    'ec2-98-81-245-139.compute-1.amazonaws.com',
+CORS_ALLOWED_ORIGINS = [  # cámbialo por tu dominio real
+    'http://ec2-98-81-245-139.compute-1.amazonaws.com',
     'http://localhost:4321',  # útil para desarrollo local con Astro
 ]
