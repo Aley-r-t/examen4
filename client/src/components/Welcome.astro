@@ -1,0 +1,184 @@
+---
+// Definición de tipos
+interface Producto {
+  id: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+  estado: 'activo' | 'inactivo';
+}
+
+// Fetch de datos iniciales
+const API = 'https://examen4.onrender.com/api/productos/';
+const response = await fetch(API);
+const productos: Producto[] = await response.json();
+
+// Funciones para el CRUD
+// Estas funciones se definirán como string para ser pasadas como atributos
+const eliminarProductoFn = `async function eliminarProducto(id) {
+  try {
+    await fetch('${API}' + id + '/', { method: 'DELETE' });
+    window.location.reload();
+  } catch (error) {
+    console.error("Error al eliminar producto:", error);
+    alert("Error al eliminar el producto");
+  }
+}`;
+
+const editarProductoFn = `function editarProducto(id, nombre, precio, stock, estado) {
+  document.getElementById('producto-id').value = id.toString();
+  document.getElementById('nombre').value = nombre;
+  document.getElementById('precio').value = precio.toString();
+  document.getElementById('stock').value = stock.toString();
+  document.getElementById('estado').value = estado;
+  document.getElementById('titulo-form').textContent = '✏️ Editar Producto';
+}`;
+
+const enviarFormularioFn = `async function enviarFormulario(event) {
+  event.preventDefault();
+  
+  const id = document.getElementById('producto-id').value;
+  const data = {
+    nombre: document.getElementById('nombre').value,
+    precio: parseFloat(document.getElementById('precio').value),
+    stock: parseInt(document.getElementById('stock').value),
+    estado: document.getElementById('estado').value
+  };
+
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? '${API}' + id + '/' : '${API}';
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(\`Error HTTP: \${response.status}\`);
+    }
+
+    window.location.reload();
+  } catch (error) {
+    console.error("Error al guardar producto:", error);
+    alert("Error al guardar el producto");
+  }
+  
+  return false;
+}`;
+
+// Inicializar formulario
+const inicializarFormularioFn = `
+document.getElementById('formulario-producto').addEventListener('submit', enviarFormulario);
+`;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD Productos</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background-color: #f7f7f7;
+      }
+
+      h1, h2 {
+        color: #333;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        margin: 10px 0;
+        background: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      form {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      input, select, button {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+      }
+
+      button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #45a049;
+      }
+
+      .actions button {
+        margin-left: 10px;
+        background: #f44336;
+      }
+
+      .actions button:first-child {
+        background: #2196F3;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>🛒 Lista de Productos</h1>
+      <ul id="lista-productos">
+        {productos.map((producto) => (
+          <li id={`producto-${producto.id}`}>
+            <span>
+              <strong>{producto.nombre}</strong> - ${producto.precio} - Stock: {producto.stock} - Estado: {producto.estado}
+            </span>
+            <span class="actions">
+              <button onclick={`editarProducto(${producto.id}, '${producto.nombre}', ${producto.precio}, ${producto.stock}, '${producto.estado}')`}>Editar</button>
+              <button onclick={`eliminarProducto(${producto.id})`}>Eliminar</button>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <h2 id="titulo-form">➕ Agregar Producto</h2>
+      <form id="formulario-producto">
+        <input type="hidden" id="producto-id" />
+        <input type="text" id="nombre" placeholder="Nombre" required />
+        <input type="number" id="precio" placeholder="Precio" step="0.01" required />
+        <input type="number" id="stock" placeholder="Stock" required />
+        <select id="estado">
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+        </select>
+        <button type="submit">Guardar</button>
+      </form>
+    </div>
+
+    <script set:html={eliminarProductoFn}></script>
+    <script set:html={editarProductoFn}></script>
+    <script set:html={enviarFormularioFn}></script>
+    <script set:html={inicializarFormularioFn}></script>
+  </body>
+</html>
